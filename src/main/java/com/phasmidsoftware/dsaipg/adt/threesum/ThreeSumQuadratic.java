@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2024. Robin Hillyard
- */
-
 package com.phasmidsoftware.dsaipg.adt.threesum;
 
 import java.util.ArrayList;
@@ -45,12 +41,26 @@ public class ThreeSumQuadratic implements ThreeSum {
      * Get a list of Triples such that the middle index is the given value j.
      *
      * @param j the index of the middle value.
-     * @return a Triple such that
+     * @return a list of Triple objects where each triple sums to zero.
      */
-     List<Triple> getTriples(int j) {
-         List<Triple> triples = new ArrayList<>();
-        // TO BE IMPLEMENTED  : for each candidate, test if a[i] + a[j] + a[k] = 0.
-throw new RuntimeException("implementation missing");
+    List<Triple> getTriples(int j) {
+        List<Triple> triples = new ArrayList<>();
+        int left = 0, right = length - 1;
+        while (left < j && right > j) {
+            int sum = a[left] + a[j] + a[right];
+            if (sum == 0) {
+                triples.add(new Triple(a[left], a[j], a[right]));
+                left++;
+                right--;
+                while (left < j && a[left] == a[left - 1]) left++; // Avoid duplicates
+                while (right > j && a[right] == a[right + 1]) right--; // Avoid duplicates
+            } else if (sum < 0) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return triples;
     }
 
     private final int[] a;
