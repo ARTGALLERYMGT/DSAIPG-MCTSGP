@@ -1,9 +1,10 @@
 package com.phasmidsoftware.dsaipg.adt.threesum;
 
 import org.junit.Test;
-
+import com.phasmidsoftware.dsaipg.util.Stopwatch;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
@@ -99,5 +100,57 @@ public class ThreeSumTest {
         System.out.println("triples: " + Arrays.toString(triples));
         assertEquals(4, triples.length);
         assertEquals(4, new ThreeSumCubic(ints).getTriples().length);
+    }
+
+    private int[] generateRandomArray(int size) {
+        Random random = new Random();
+        int[] array = new int[size];
+        for (int i = 0; i < size; i++) {
+            array[i] = random.nextInt(2000) - 1000;
+        }
+        return array;
+    }
+
+    @Test
+    public void testThreeSumTiming() {
+        // Array sizes for testing
+        int[] sizes = {1000, 2000, 4000, 8000, 16000};
+        
+        System.out.println("\nThreeSum Algorithm Timing Analysis");
+        System.out.println("N\tCubic(s)\tQuadratic(s)\tCubic Ratio\tQuadratic Ratio");
+        
+        double prevCubic = 0;
+        double prevQuadratic = 0;
+        
+        for (int size : sizes) {
+            int[] array = generateRandomArray(size);
+            double cubicTime = 0;
+            double quadraticTime = 0;
+            
+            // Time cubic algorithm
+            try (Stopwatch timer = new Stopwatch()) {
+                ThreeSumCubic cubic = new ThreeSumCubic(array.clone());
+                cubic.getTriples();
+                cubicTime = timer.lap();
+            }
+            
+            // Time quadratic algorithm
+            try (Stopwatch timer = new Stopwatch()) {
+                ThreeSumQuadratic quadratic = new ThreeSumQuadratic(array.clone());
+                quadratic.getTriples();
+                quadraticTime = timer.lap();
+            }
+            
+            // Calculate ratios
+            String cubicRatio = prevCubic == 0 ? "N/A" : String.format("%.2f", cubicTime / prevCubic);
+            String quadRatio = prevQuadratic == 0 ? "N/A" : String.format("%.2f", quadraticTime / prevQuadratic);
+            
+            // Print results
+            System.out.printf("%d\t%.3f\t\t%.3f\t\t%s\t\t%s%n", 
+                    size, cubicTime, quadraticTime, cubicRatio, quadRatio);
+            
+            prevCubic = cubicTime;
+            prevQuadratic = quadraticTime;
+        }
     }
 }
