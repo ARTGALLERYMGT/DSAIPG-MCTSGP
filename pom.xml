@@ -96,6 +96,28 @@
             <artifactId>annotations</artifactId>
             <version>13.0</version>
             <scope>compile</scope>
+            <dependency>
+       <groupId>org.jgrapht</groupId>
+       <artifactId>jgrapht-core</artifactId>
+      <version>1.5.1</version>
+       </dependency>
+       <dependencies>
+    <!-- JFreeChart for plotting graphs -->
+    <dependency>
+        <groupId>org.jfree</groupId>
+        <artifactId>jfreechart</artifactId>
+        <version>1.5.3</version>
+    </dependency>
+
+    <!-- JCommon (Required for JFreeChart) -->
+    <dependency>
+        <groupId>org.jfree</groupId>
+        <artifactId>jcommon</artifactId>
+        <version>1.0.23</version>
+    </dependency>
+</dependencies>
+
+
         </dependency>
         <!--        <dependency>
                     <groupId>edu.neu.coe.mgen</groupId>
