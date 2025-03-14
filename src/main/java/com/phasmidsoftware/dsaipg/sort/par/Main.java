@@ -3,6 +3,7 @@
  */
 
 package com.phasmidsoftware.dsaipg.sort.par;
+import com.phasmidsoftware.dsaipg.sort.par.ParSort;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -40,11 +41,11 @@ public class Main {
             timeList.add(time);
 
 
-            System.out.println("cutoff：" + (ParSort.cutoff) + "\t\t10times Time:" + time + "ms");
+            System.out.println("cutoff :" + (ParSort.cutoff) + "\t\t10times Time:" + time + "ms");
 
         }
         try {
-            FileOutputStream fis = new FileOutputStream("./src/result.csv");
+            FileOutputStream fis = new FileOutputStream("result.csv");
             OutputStreamWriter isr = new OutputStreamWriter(fis);
             BufferedWriter bw = new BufferedWriter(isr);
             int j = 0;
@@ -62,9 +63,11 @@ public class Main {
     }
 
     private static void processArgs(String[] args) {
-        String[] xs = args;
-        while (xs.length > 0)
-            if (xs[0].startsWith("-")) xs = processArg(xs);
+        if (args.length < 2) return; // Ensure we have at least one key-value pair
+    
+        for (int i = 0; i < args.length - 1; i += 2) {
+            processCommand(args[i], args[i + 1]);
+        }
     }
 
     private static String[] processArg(String[] xs) {
@@ -73,15 +76,14 @@ public class Main {
         processCommand(xs[0], xs[1]);
         return result;
     }
-
-    private static void processCommand(String x, String y) {
-        if (x.equalsIgnoreCase("N")) setConfig(x, Integer.parseInt(y));
-        else
-            // TODO sort this out
-            if (x.equalsIgnoreCase("P")) //noinspection ResultOfMethodCallIgnored
-                ForkJoinPool.getCommonPoolParallelism();
+    private static void processCommand(String key, String value) {
+        try {
+            int intValue = Integer.parseInt(value);
+            configuration.put(key, intValue);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid argument: " + key + " " + value);
+        }
     }
-
     private static void setConfig(String x, int i) {
         configuration.put(x, i);
     }
