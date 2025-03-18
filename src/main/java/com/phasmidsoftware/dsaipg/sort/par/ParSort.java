@@ -1,34 +1,39 @@
 package com.phasmidsoftware.dsaipg.sort.par;
 
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 final class ParSort {
-    public static int cutoff = 1000; // Default cutoff
+    public static int cutoff = 1000;
+    private static ForkJoinPool pool = ForkJoinPool.commonPool();  
+
+    public static void setPool(ForkJoinPool newPool) {
+        pool = newPool;
+    }
 
     public static void sort(int[] array, int from, int to) {
         if (to - from >= cutoff) {
             int mid = (from + to) / 2;
 
-            // Initialize the CompletableFuture objects
-            CompletableFuture<int[]> completableFuture1 = asyncSort(array, from, mid);
-            CompletableFuture<int[]> completableFuture2 = asyncSort(array, mid, to);
+            ForkJoinTask<int[]> task1 = pool.submit(() -> sortRecursive(array, from, mid));
+            ForkJoinTask<int[]> task2 = pool.submit(() -> sortRecursive(array, mid, to));
 
-            // Combine results from two recursive sorts
-            CompletableFuture<int[]> completableFuture = completableFuture1
-                    .thenCombine(completableFuture2, ParSort::doMerge);
-
-            // Copy sorted result back to the original array
-            int[] sortedArray = completableFuture.join(); // Ensure completion
-            System.arraycopy(sortedArray, 0, array, from, sortedArray.length);
+            try {
+                int[] sorted1 = task1.get();
+                int[] sorted2 = task2.get();
+                int[] merged = doMerge(sorted1, sorted2);
+                System.arraycopy(merged, 0, array, from, merged.length);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
         } else {
-            Arrays.sort(array, from, to); // Base case: Use sequential sort
+            Arrays.sort(array, from, to);
         }
     }
 
     static int[] sortRecursive(int[] array, int from, int to) {
-        int[] result = Arrays.copyOfRange(array, from, to); // Copy portion to result array
-        Arrays.sort(result); // Sort the copied portion
+        int[] result = Arrays.copyOfRange(array, from, to);
+        Arrays.sort(result);
         return result;
     }
 
@@ -42,9 +47,5 @@ final class ParSort {
             else result[k] = xs1[i++];
         }
         return result;
-    }
-
-    static CompletableFuture<int[]> asyncSort(int[] array, int from, int to) {
-        return CompletableFuture.supplyAsync(() -> sortRecursive(array, from, to));
     }
 }
