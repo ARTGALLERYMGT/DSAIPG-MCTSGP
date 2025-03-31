@@ -75,4 +75,58 @@ public class MCTS {
         scanner.close();
     }
 
+    //Methods Added 
 
+    private static int getValidatedChoice(Scanner scanner, int min, int max) {
+        while (true) {
+            try {
+                int input = Integer.parseInt(scanner.next().trim());
+                if (input >= min && input <= max) return input;
+                System.out.print(" Enter a number between " + min + " and " + max + ": ");
+            } catch (Exception e) {
+                System.out.print(" Invalid input. Enter a number: ");
+            }
+        }
+    }
+
+    public Node<TicTacToe> run(int simulations) {
+        for (int i = 0; i < simulations; i++) {
+            Node<TicTacToe> selected = select(root);
+            selected.explore();
+        }
+        return bestChild(root);
+    }
+
+    private Node<TicTacToe> select(Node<TicTacToe> node) {
+        while (!node.isLeaf() && !node.children().isEmpty()) {
+            node = bestUCB1Child(node);
+        }
+        return node;
+    }
+
+    private Node<TicTacToe> bestUCB1Child(Node<TicTacToe> node) {
+        double c = Math.sqrt(2);
+        int totalPlayouts = node.playouts();
+
+        return node.children().stream()
+                .max(java.util.Comparator.comparingDouble(child -> {
+                    int wins = child.wins();
+                    int plays = child.playouts();
+                    if (plays == 0) return Double.MAX_VALUE;
+                    return (double) wins / plays + c * Math.sqrt(Math.log(totalPlayouts) / plays);
+                }))
+                .orElseThrow();
+    }
+
+    private Node<TicTacToe> bestChild(Node<TicTacToe> node) {
+        return node.children().stream()
+                .max(java.util.Comparator.comparingDouble(child -> (double) child.wins() / child.playouts()))
+                .orElseThrow();
+    }
+
+    public MCTS(Node<TicTacToe> root) {
+        this.root = root;
+    }
+
+    private final Node<TicTacToe> root;
+}
