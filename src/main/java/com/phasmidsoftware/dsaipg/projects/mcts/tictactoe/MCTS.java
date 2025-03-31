@@ -97,6 +97,7 @@ public class MCTS {
         return bestChild(root);
     }
 
+    
     private Node<TicTacToe> select(Node<TicTacToe> node) {
         while (!node.isLeaf() && !node.children().isEmpty()) {
             node = bestUCB1Child(node);
